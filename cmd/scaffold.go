@@ -17,8 +17,8 @@ var _scaffoldCmd = &cobra.Command{
 		config := map[string]any{
 			"ModuleName":   "github.com/mshirdel/byteland",
 			"Port":         "9090",
-			"RootCMD":      "sandbox",
-			"RootCMDShort": "sandbox",
+			"RootCMD":      projectRoot,
+			"RootCMDShort": projectRoot,
 			"RunCMD":       "run",
 			"RunCMDShort":  "run project",
 		}

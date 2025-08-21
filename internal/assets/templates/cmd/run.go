@@ -7,8 +7,8 @@ import (
 )
 
 var _runCmd = &cobra.Command{
-	Use:   "{{.RunCMD}}",
-	Short: "{{.RunCMDShort}}",
+	Use:   "run",
+	Short: "run project",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		run()
 		return nil

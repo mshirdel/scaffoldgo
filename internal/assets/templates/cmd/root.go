@@ -7,8 +7,8 @@ import (
 
 var (
 	_rootCMD = cobra.Command{
-		Use:   "{{.RootCMD}}",
-		Short: "{{.RootCMDShort}}",
+		Use:   "{{.projectName}}",
+		Short: "{{.projectName}}",
 	}
 
 	_configPath string
@@ -16,6 +16,7 @@ var (
 
 func init() {
 	_rootCMD.AddCommand(_runCmd)
+	_rootCMD.AddCommand(_serve)
 }
 
 func Execute() {

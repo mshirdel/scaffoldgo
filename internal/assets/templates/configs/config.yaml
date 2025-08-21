@@ -1,3 +1,0 @@
-http:
-  address: 'localhost'
-  port: {{.Port}}

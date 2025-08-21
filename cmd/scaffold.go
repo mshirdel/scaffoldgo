@@ -2,33 +2,43 @@ package cmd
 
 import (
 	"fmt"
+	"io/fs"
 	"path/filepath"
 
 	"github.com/mshirdel/scaffoldgo/internal"
+	"github.com/mshirdel/scaffoldgo/internal/assets"
 	"github.com/spf13/cobra"
 )
+
+var (
+	moduleName  string
+	projectName string
+	port        int
+)
+
+func init() {
+	_scaffoldCmd.Flags().StringVarP(&moduleName, "module", "m", "", "Module name like: gitbun.com/name/project_name ")
+	_scaffoldCmd.Flags().StringVarP(&projectName, "name", "n", "", "Project name")
+	_scaffoldCmd.Flags().IntVarP(&port, "port", "p", 8080, "Web server port")
+}
 
 var _scaffoldCmd = &cobra.Command{
 	Use:   "create",
 	Short: "Create a new go project",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		name := args[0]
-		projectRoot := filepath.Join(".", name)
+		projectRoot := filepath.Join(".", projectName)
 		config := map[string]any{
-			"ModuleName":   "github.com/mshirdel/byteland",
-			"Port":         "9090",
-			"RootCMD":      name,
-			"RootCMDShort": name,
+			"ModuleName":   moduleName,
+			"Port":         port,
+			"RootCMDShort": projectName,
+			"RootCMD":      projectName,
 			"RunCMD":       "run",
 			"RunCMDShort":  "run project",
 		}
 
-		files := map[string]string{
-			filepath.Join(projectRoot, "", "go.mod"):             "templates/gomod",
-			filepath.Join(projectRoot, "", "main.go"):            "templates/maingo",
-			filepath.Join(projectRoot, "configs", "config.yaml"): "templates/configs/config.yaml",
-			filepath.Join(projectRoot, "cmd", "root.go"):         "templates/cmd/rootgo",
-			filepath.Join(projectRoot, "cmd", "run.go"):          "templates/cmd/rungo",
+		files, err := collectFiles(projectRoot)
+		if err != nil {
+			fmt.Println(err)
 		}
 
 		for path, template := range files {
@@ -37,6 +47,31 @@ var _scaffoldCmd = &cobra.Command{
 
 		return nil
 	},
+}
+
+func collectFiles(projectRoot string) (map[string]string, error) {
+	files := make(map[string]string)
+
+	err := fs.WalkDir(assets.Templates, "templates", func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			return nil
+		}
+
+		relPath, err := filepath.Rel("templates", path)
+		if err != nil {
+			return err
+		}
+
+		dest := filepath.Join(projectRoot, relPath)
+
+		files[dest] = path
+		return nil
+	})
+
+	return files, err
 }
 
 func create(destPath, templatePath string, values map[string]any) {
